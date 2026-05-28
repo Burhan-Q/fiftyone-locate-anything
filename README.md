@@ -147,6 +147,10 @@ sessions.
 | `text_grounding`| `prompt="..."` (referring to text in image)                    | `fo.Detections` |
 | `gui_box`       | `prompt="..."` (GUI element region)                            | `fo.Detections` |
 
+<p align="center">
+  <img src="https://media.githubusercontent.com/media/NVlabs/Eagle/e21b6acde7aff187aa63bafd4cd4eca0c099e7c3/Embodied/assets/images/teaser.jpg" alt="LocateAnything teaser" />
+</p>
+
 ---
 
 ## Examples
