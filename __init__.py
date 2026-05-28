@@ -4,7 +4,7 @@ NVIDIA Eagle's open-vocabulary grounding VLM as a FiftyOne Zoo remote model.
 Supports image (7 operations) and video (frame-sampled) inference.
 
 License notice: LocateAnything-3B weights are released under the
-NVIDIA License — non-commercial research only.
+NVIDIA License (non-commercial research only).
 
 Usage:
     import fiftyone.zoo as foz

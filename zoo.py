@@ -61,12 +61,12 @@ class LocateAnythingConfig(fout.TorchImageModelConfig):
                 f"Must be one of {sorted(VALID_OPERATIONS)}"
             )
 
-        # Detect/layout class list (raw dict access — no list parser available)
+        # Detect/layout class list (raw dict access; no list parser available)
         self.classes = d.get("classes")
         self.prompt = self.parse_string(d, "prompt", default=None)
         self.single_instance = self.parse_bool(d, "single_instance", default=False)
 
-        # Generation — defaults verbatim from locateanything_worker.py
+        # Generation: defaults verbatim from locateanything_worker.py
         self.generation_mode = self.parse_string(d, "generation_mode", default="hybrid")
         self.max_new_tokens = self.parse_number(d, "max_new_tokens", default=2048)
         self.do_sample = self.parse_bool(d, "do_sample", default=True)
@@ -352,7 +352,7 @@ class LocateAnythingBaseModel(
     def has_collate_fn(self) -> bool:
         return True
 
-    # collate_fn is inherited from TorchModelMixin — DO NOT override.
+    # collate_fn is inherited from TorchModelMixin; DO NOT override.
 
     def build_get_item(
         self, field_mapping: dict[str, str] | None = None
@@ -560,7 +560,7 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
     """Frame-sampled video inference.
 
     LocateAnything-3B's processor supports video natively, but the model has
-    no video-specific code path — it treats frames as image sequences. This
+    no video-specific code path; it treats frames as image sequences. This
     class decodes the video into frames and runs the image inference path
     per frame. Returns `{frame_num: label}` per sample so FiftyOne merges
     results into `sample.frames[N].field`.

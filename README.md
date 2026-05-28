@@ -1,7 +1,7 @@
 # FiftyOne Remote Zoo Model: NVIDIA Locate Anything
 
 A [FiftyOne](https://github.com/voxel51/fiftyone) remote Model Zoo integration
-for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B) —
+for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B),
 an open-vocabulary grounding VLM from the
 [Eagle](https://github.com/NVlabs/Eagle) family. Learn more about the
 [FiftyOne Model Zoo in the Voxel51 docs](https://docs.voxel51.com/model_zoo).
@@ -12,7 +12,6 @@ ScreenSpot-Pro, etc.).**
 
 ## Table of Contents
 
-- [License notice](#license-notice)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Operations](#operations)
@@ -22,21 +21,14 @@ ScreenSpot-Pro, etc.).**
 - [Loading Eagle / Rex-Omni eval bundles](#loading-eagle--rex-omni-eval-bundles)
 - [Configuration reference](#configuration-reference)
 - [Limitations](#limitations)
-
----
-
-## License notice
-
-LocateAnything-3B weights are released under the **NVIDIA License —
-non-commercial research only**. This wrapper is MIT, but the model it loads is
-not free for commercial use.
+- [License notice](#license-notice)
 
 ---
 
 ## Installation
 
 Install the runtime dependencies the model requires. `lmdb`, `peft`,
-`opencv-python-headless`, and `decord` are not optional — the HF model's
+`opencv-python-headless`, and `decord` are not optional: the HF model's
 `modeling_locateanything.py` and `processing_locateanything.py` files
 hard-import them at module-load time.
 
@@ -116,7 +108,7 @@ session = fo.launch_app(dataset)
 ```
 
 After step 1 and 2 are done once, each subsequent script only needs
-`foz.load_zoo_model(...)` — the registration and weights persist across
+`foz.load_zoo_model(...)`. The registration and weights persist across
 sessions.
 
 ---
@@ -220,8 +212,8 @@ dataset.apply_model(model, label_field="text_location")
 ## Using the FiftyOne App
 
 You can drive the model interactively from the App via the **Apply Model**
-operator — no notebook code required for each run. The `resolve_input` form
-in `__init__.py` is what FiftyOne renders for the operator's parameters.
+operator, with no notebook code required for each run. The `resolve_input`
+form in `__init__.py` is what FiftyOne renders for the operator's parameters.
 
 End-to-end flow:
 
@@ -262,7 +254,7 @@ Then in the App:
 | Operation | `detect` | One of the 7 operations |
 | Classes (comma-separated) | _(empty)_ | For `detect` / `layout`. Comma-split into a list by the loader. |
 | Prompt | _(empty)_ | For `grounding` / `point` / `text_grounding` / `gui_box` |
-| Single Instance | `False` | Grounding only — switches to the "single instance" template |
+| Single Instance | `False` | Grounding only; switches to the "single instance" template |
 | Generation Mode | `hybrid` | `hybrid` / `fast` / `slow` |
 | Max New Tokens | `2048` | |
 | Use Sampling | `True` | |
@@ -276,7 +268,7 @@ Then in the App:
 
 The form takes a single static prompt. If you want a different prompt per
 sample (e.g., the value of a `caption` field), the App route doesn't expose
-that directly — use the notebook pattern with `prompt_field=...` from
+that directly. Use the notebook pattern with `prompt_field=...` from
 [Examples](#examples) instead.
 
 ---
@@ -335,7 +327,7 @@ ds = load_eagle_jsonl(
 ```
 
 > **Why the dynamic import?** The directory `@Burhan-Q/fiftyone-locate-anything`
-> contains `@` and `-` characters — neither is valid in a Python identifier,
+> contains `@` and `-` characters; neither is valid in a Python identifier,
 > so `from @Burhan-Q.fiftyone-locate-anything import ...` won't parse. The
 > `importlib.util.spec_from_file_location` pattern above bypasses Python's
 > normal package machinery and works regardless of the on-disk name.
@@ -375,11 +367,11 @@ For per-sample prompts (instead of a single static `prompt=`), pass
 
 ## Limitations
 
-- **No confidence scores** — the model emits no per-detection scores;
+- **No confidence scores**: the model emits no per-detection scores;
   `fo.Detection.confidence` is `None`. Affects mAP tie-breaking.
-- **Single-image inference** at the model level — no native batching.
+- **Single-image inference** at the model level; no native batching.
 - **bf16 on CUDA; fp16 on MPS; fp32 on CPU.** Apple Silicon works but is slower.
-- **Video is frame-by-frame** — no temporal modeling, no cross-frame tracking.
+- **Video is frame-by-frame**: no temporal modeling, no cross-frame tracking.
 - **Layout taxonomy is 4 classes** (`title`, `paragraph`, `figure`, `table`);
   for other layouts use `detect` with your own class list.
 
@@ -394,3 +386,11 @@ ranges in our manifest, try:
 transformers==4.57.1
 tokenizers==0.22.0
 ```
+
+---
+
+## License notice
+
+LocateAnything-3B weights are released under the **NVIDIA License (non-commercial
+research only)**. This wrapper is MIT, but the model it loads is not free for
+commercial use.
