@@ -1,5 +1,43 @@
 [project]
 name = "fo-locate-anything"
 version = "0.1.0"
+description = "FiftyOne Zoo remote model wrapping NVIDIA LocateAnything-3B"
 requires-python = ">=3.11"
-dependencies = []
+license = { text = "MIT" }
+dependencies = [
+    "fiftyone>=1.15.0",
+    "huggingface-hub",
+    "torch",
+    "transformers>=4.57.1,<4.58",
+    "tokenizers>=0.22.0",
+    "Pillow",
+    "numpy",
+    "timm",
+]
+
+[project.optional-dependencies]
+# Default video extra. opencv ships everywhere; native `decord` only installs
+# on non-Mac platforms (it has no arm64 macOS wheel). MacOS users wanting
+# decord opt in to `decord-mac` (eva-decord fork — imports as `decord`).
+# Backend probe order at runtime: decord → cv2 → torchvision.io.
+video = [
+    "opencv-python-headless>=4.10",
+    "decord; sys_platform != 'darwin'",
+]
+# Opt-in for arm64 MacOS — installs eva-decord (registers as `decord` module).
+# Usage: pip install "fo-locate-anything[video,decord-mac]"
+decord-mac = [
+    "eva-decord; sys_platform == 'darwin'",
+]
+training = [
+    "accelerate",
+    "peft",
+    "lmdb",
+    "liger-kernel",
+]
+all = ["fo-locate-anything[video]"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

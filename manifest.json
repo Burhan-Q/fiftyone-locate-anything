@@ -1,0 +1,30 @@
+{
+  "name": "@Burhan-Q/fo-locate-anything",
+  "url": "https://github.com/Burhan-Q/fo-locate-anything",
+  "models": [
+    {
+      "base_name": "nvidia/LocateAnything-3B",
+      "base_filename": "LocateAnything-3B",
+      "author": "NVIDIA",
+      "source": "https://huggingface.co/nvidia/LocateAnything-3B",
+      "license": "NVIDIA License (non-commercial research only). See https://huggingface.co/nvidia/LocateAnything-3B",
+      "description": "NVIDIA LocateAnything-3B: open-vocabulary grounding VLM (3B params, Qwen2.5-3B + MoonViT + Parallel Box Decoder). Image and (frame-sampled) video. 7 operations: detect, grounding, point, scene_text, layout, text_grounding, gui_box. Returns fo.Detections or fo.Keypoints (image), {frame: label} (video).",
+      "requirements": {
+        "packages": [
+          "huggingface-hub",
+          "torch",
+          "transformers>=4.57.1,<4.58",
+          "tokenizers>=0.22.0",
+          "Pillow",
+          "timm"
+        ],
+        "cpu": {"support": true},
+        "gpu": {"support": true}
+      },
+      "tags": [
+        "detection", "keypoints", "grounding", "ocr", "layout", "gui",
+        "torch", "zero-shot", "image", "video", "VLM", "open-vocabulary"
+      ]
+    }
+  ]
+}
