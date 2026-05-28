@@ -587,7 +587,16 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
 
         results: list[dict[int, fol.Label]] = []
         for i, item in enumerate(batch):
-            filepath = item if isinstance(item, str) else item.get("filepath")
+            filepath = self._resolve_video_filepath(item)
+            if filepath is None:
+                logger.error(
+                    "Could not resolve a video filepath from input of type %s; "
+                    "skipping sample",
+                    type(item).__name__,
+                )
+                results.append({})
+                continue
+
             sample = samples[i] if samples and i < len(samples) else None
             call_prompt = None
             if sample and "prompt_field" in self._fields:
@@ -600,6 +609,25 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
                 frame_labels[frame_num] = self._run_inference(pil_image, call_prompt)
             results.append(frame_labels)
         return results
+
+    @staticmethod
+    def _resolve_video_filepath(item: Any) -> str | None:
+        """Normalize an input from any apply_model path into a video filepath.
+
+        FiftyOne's `_apply_video_model` passes an `eta.core.video.VideoReader`
+        instance (which stores the source path on `.inpath`). Notebook callers
+        may pass a filepath string or a dict. Returns None when no path is
+        recoverable so the caller can log a clear message.
+        """
+        if isinstance(item, str):
+            return item
+        if isinstance(item, dict):
+            return item.get("filepath") or item.get("path") or item.get("video")
+        for attr in ("inpath", "filepath", "path"):
+            value = getattr(item, attr, None)
+            if isinstance(value, str):
+                return value
+        return None
 
     def _compute_indices(self, total: int, src_fps: float) -> list[int]:
         if self.config.every_nth:
