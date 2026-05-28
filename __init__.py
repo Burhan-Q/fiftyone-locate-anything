@@ -128,16 +128,28 @@ def resolve_input(model_name: str, ctx: Any) -> types.Property:
 
     inputs.int(
         "frames",
-        default=8,
+        default=None,
+        required=False,
         label="Video: # Sampled Frames",
-        description="Number of evenly-spaced frames per video.",
+        description=(
+            "Number of evenly-spaced frames to sample per video. "
+            "Leave empty to process every frame at native rate (recommended "
+            "for smooth playback)."
+        ),
     )
     inputs.float(
         "fps",
         default=None,
         required=False,
         label="Video: Target FPS",
-        description="Overrides frame count.",
+        description="Sample at this rate; overrides frame count.",
+    )
+    inputs.int(
+        "every_nth",
+        default=None,
+        required=False,
+        label="Video: Every Nth Frame",
+        description="Sample every Kth frame; overrides frames and fps.",
     )
 
     return types.Property(inputs)

@@ -76,10 +76,12 @@ class LocateAnythingConfig(fout.TorchImageModelConfig):
             d, "repetition_penalty", default=1.1
         )
 
-        # Video-only sampling controls
-        self.frames = self.parse_number(d, "frames", default=8)
-        self.fps = d.get("fps")
-        self.every_nth = d.get("every_nth")
+        # Video-only sampling controls. With all three left as None (the
+        # default), every frame is processed (native frame rate) so the App
+        # plays back without "blinking" gaps. Set any one to subsample.
+        self.frames = d.get("frames")  # exact count of evenly-spaced samples
+        self.fps = d.get("fps")  # target sampling FPS
+        self.every_nth = d.get("every_nth")  # decimation factor (every Kth frame)
 
 
 # ============================================================================
@@ -635,12 +637,16 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
         if self.config.fps:
             stride = max(1, int(round(src_fps / float(self.config.fps))))
             return list(range(0, total, stride))
-        n = max(1, int(self.config.frames))
-        if total <= n:
-            return list(range(total))
-        if n == 1:
-            return [0]
-        return [int(round(i * (total - 1) / (n - 1))) for i in range(n)]
+        if self.config.frames:
+            n = max(1, int(self.config.frames))
+            if total <= n:
+                return list(range(total))
+            if n == 1:
+                return [0]
+            return [int(round(i * (total - 1) / (n - 1))) for i in range(n)]
+        # No sampling args set: process every frame at native rate so the App
+        # plays back with continuous overlays instead of blinking gaps.
+        return list(range(total))
 
     def _sample_frames(self, filepath: str):
         """Yield (frame_num, PIL.Image) tuples per the configured sampling.

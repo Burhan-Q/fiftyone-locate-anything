@@ -291,8 +291,9 @@ Then in the App:
 | Temperature | `0.7` | Only used when sampling |
 | Top-p | `0.9` | Only used when sampling |
 | Repetition Penalty | `1.1` | |
-| Video: # Sampled Frames | `8` | Number of evenly-spaced frames per video |
-| Video: Target FPS | _(empty)_ | Overrides frame count |
+| Video: # Sampled Frames | _(empty)_ | Empty = every frame (recommended). Set N to pick N evenly-spaced frames. |
+| Video: Target FPS | _(empty)_ | Sample at this rate; overrides frame count |
+| Video: Every Nth Frame | _(empty)_ | Decimation factor; overrides frames and fps |
 
 ### Per-sample prompts from the App
 
@@ -315,11 +316,19 @@ video_model = foz.load_zoo_model(
     media_type="video",
     operation="detect",
     classes=["person", "car"],
-    frames=8,                # or fps=2.0, or every_nth=15
+    # No sampling args: process every frame at native rate (recommended).
+    # frames=8,        # or pick N evenly-spaced frames
+    # fps=2.0,         # or sample at a target FPS
+    # every_nth=15,    # or take every Kth frame
 )
 video_dataset.apply_model(video_model, label_field="dets")
 # Per-frame results land in sample.frames[N].dets
 ```
+
+**Default is every-frame at native rate.** When no sampling argument is set,
+inference runs on every frame so the App plays back with continuous overlays.
+Set `frames`, `fps`, or `every_nth` to subsample (e.g., for long videos or
+quick previews).
 
 Frame extraction backend probe order: `decord` → `cv2` → `torchvision.io`.
 
@@ -386,7 +395,7 @@ All `foz.load_zoo_model(...)` kwargs:
 | `temperature` | `0.7` | |
 | `top_p` | `0.9` | |
 | `repetition_penalty` | `1.1` | |
-| `frames` | `8` | Video: # evenly-spaced frames |
+| `frames` | `None` | Video: # evenly-spaced frames. `None` = every frame (native rate) |
 | `fps` | `None` | Video: target sampling FPS (overrides `frames`) |
 | `every_nth` | `None` | Video: sample every Kth frame (overrides others) |
 
