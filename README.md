@@ -17,6 +17,7 @@ ScreenSpot-Pro, etc.).**
 - [Quick Start](#quick-start)
 - [Operations](#operations)
 - [Examples](#examples)
+- [Using the FiftyOne App](#using-the-fiftyone-app)
 - [Video inference](#video-inference)
 - [Loading Eagle / Rex-Omni eval bundles](#loading-eagle--rex-omni-eval-bundles)
 - [Configuration reference](#configuration-reference)
@@ -213,6 +214,70 @@ model = foz.load_zoo_model(
 )
 dataset.apply_model(model, label_field="text_location")
 ```
+
+---
+
+## Using the FiftyOne App
+
+You can drive the model interactively from the App via the **Apply Model**
+operator — no notebook code required for each run. The `resolve_input` form
+in `__init__.py` is what FiftyOne renders for the operator's parameters.
+
+End-to-end flow:
+
+```python
+import fiftyone as fo
+import fiftyone.zoo as foz
+
+# One-time setup (skip if already done)
+foz.register_zoo_model_source(
+    "https://github.com/Burhan-Q/fiftyone-locate-anything",
+    overwrite=True,
+)
+foz.download_zoo_model(
+    "https://github.com/Burhan-Q/fiftyone-locate-anything",
+    model_name="nvidia/LocateAnything-3B",
+)
+
+dataset = foz.load_zoo_dataset("quickstart")
+session = fo.launch_app(dataset)
+```
+
+Then in the App:
+
+1. Open the **operators palette** (press the backtick `` ` `` key, or click the
+   lightning-bolt icon in the toolbar).
+2. Search for **"Apply Model"** and select it.
+3. Pick **`nvidia/LocateAnything-3B`** from the model list. The form below appears.
+4. Fill in the form (see fields table below).
+5. Choose a **label field** name (e.g. `predictions`) and whether to run
+   **delegated** (background) or immediate.
+6. Click **Execute**. Predictions stream into the chosen field on each sample.
+
+### Form fields
+
+| Field | Default | Notes |
+|---|---|---|
+| Media Type | `image` | `image` or `video` |
+| Operation | `detect` | One of the 7 operations |
+| Classes (comma-separated) | _(empty)_ | For `detect` / `layout`. Comma-split into a list by the loader. |
+| Prompt | _(empty)_ | For `grounding` / `point` / `text_grounding` / `gui_box` |
+| Single Instance | `False` | Grounding only — switches to the "single instance" template |
+| Generation Mode | `hybrid` | `hybrid` / `fast` / `slow` |
+| Max New Tokens | `2048` | |
+| Use Sampling | `True` | |
+| Temperature | `0.7` | Only used when sampling |
+| Top-p | `0.9` | Only used when sampling |
+| Repetition Penalty | `1.1` | |
+| Video: # Sampled Frames | `8` | Number of evenly-spaced frames per video |
+| Video: Target FPS | _(empty)_ | Overrides frame count |
+
+### Per-sample prompts from the App
+
+The form takes a single static prompt. If you want a different prompt per
+sample (e.g., the value of a `caption` field), the App route doesn't expose
+that directly — use the notebook pattern with `prompt_field=...` from
+[Examples](#examples) instead.
 
 ---
 
