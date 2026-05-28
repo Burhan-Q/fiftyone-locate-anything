@@ -1,52 +1,124 @@
 # fo-locate-anything
 
-FiftyOne Zoo remote model wrapping NVIDIA's
-[LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B) —
+A [FiftyOne](https://github.com/voxel51/fiftyone) remote Model Zoo integration
+for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B) —
 an open-vocabulary grounding VLM from the
-[Eagle](https://github.com/NVlabs/Eagle) family.
+[Eagle](https://github.com/NVlabs/Eagle) family. Learn more about the
+[FiftyOne Model Zoo in the Voxel51 docs](https://docs.voxel51.com/model_zoo).
 
-**Image + video support, 7 operations, and an Eagle JSONL dataset importer
-for evaluating against Rex-Omni-EvalData benchmarks (DocLayNet, COCO, LVIS,
+**Image + video support, 7 operations, and an Eagle JSONL dataset importer for
+evaluating against Rex-Omni-EvalData benchmarks (DocLayNet, COCO, LVIS,
 ScreenSpot-Pro, etc.).**
+
+## Table of Contents
+
+- [License notice](#license-notice)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Operations](#operations)
+- [Examples](#examples)
+- [Video inference](#video-inference)
+- [Loading Eagle / Rex-Omni eval bundles](#loading-eagle--rex-omni-eval-bundles)
+- [Configuration reference](#configuration-reference)
+- [Limitations](#limitations)
+
+---
 
 ## License notice
 
 LocateAnything-3B weights are released under the **NVIDIA License —
-non-commercial research only**. This wrapper is MIT, but the model it
-loads is not free for commercial use.
+non-commercial research only**. This wrapper is MIT, but the model it loads is
+not free for commercial use.
 
-## Install
+---
+
+## Installation
+
+Install the runtime dependencies the model requires. `lmdb`, `peft`,
+`opencv-python-headless`, and `decord` are not optional — the HF model's
+`modeling_locateanything.py` and `processing_locateanything.py` files
+hard-import them at module-load time.
+
+### Linux / Windows
 
 ```bash
-# image-only inference
-pip install fo-locate-anything
-
-# + video frame sampling
-# (Linux/Win: opencv + decord. MacOS: opencv only — see "MacOS users" below)
-pip install "fo-locate-anything[video]"
-
-# MacOS users who want decord performance: opt into the eva-decord fork
-pip install "fo-locate-anything[video,decord-mac]"
-
-# everything
-pip install "fo-locate-anything[all]"
+pip install fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
+            torch torchvision huggingface-hub Pillow timm numpy \
+            lmdb peft "opencv-python-headless>=4.10" decord
 ```
 
-**Note for MacOS users:** the native `decord` wheel is not available on arm64
-Macs. The `[video]` extra installs only opencv-python-headless on MacOS; opt
-into `[decord-mac]` to additionally install `eva-decord` (a maintained fork
-that registers as the `decord` module). The runtime backend selector tries
-`decord` first, falls back to `cv2`, then `torchvision.io`.
+### macOS (Apple Silicon / arm64)
 
-Then register the zoo source:
+`decord` has no arm64 macOS wheel; use the maintained `eva-decord` fork instead
+(it registers as the `decord` module so the rest of the code is unchanged):
+
+```bash
+pip install fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
+            torch torchvision huggingface-hub Pillow timm numpy \
+            lmdb peft "opencv-python-headless>=4.10" eva-decord
+```
+
+### Via `uv`
+
+```bash
+uv add fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
+       torch torchvision huggingface-hub Pillow timm numpy \
+       lmdb peft "opencv-python-headless>=4.10"
+# Then add the right decord on your platform:
+uv add decord                            # Linux / Windows
+uv add eva-decord                        # macOS
+```
+
+### Auto-install via FiftyOne (alternative)
+
+FiftyOne can install the manifest's required packages for you. After
+`register_zoo_model_source`, run:
 
 ```python
+foz.install_zoo_model_requirements("nvidia/LocateAnything-3B")
+```
+
+Note: on arm64 macOS this fails on `decord`. Install `eva-decord` manually
+first, then this command will skip already-satisfied deps.
+
+---
+
+## Quick Start
+
+```python
+import fiftyone as fo
 import fiftyone.zoo as foz
 
+# 1. Register the model source (one time per environment)
 foz.register_zoo_model_source(
-    "https://github.com/Burhan-Q/fo-locate-anything"
+    "https://github.com/Burhan-Q/fo-locate-anything",
+    overwrite=True,
 )
+
+# 2. Download the model weights (~4 GB, one time)
+foz.download_zoo_model(
+    "https://github.com/Burhan-Q/fo-locate-anything",
+    model_name="nvidia/LocateAnything-3B",
+)
+
+# 3. Load and run inference
+dataset = foz.load_zoo_dataset("quickstart")
+
+model = foz.load_zoo_model(
+    "nvidia/LocateAnything-3B",
+    operation="detect",
+    classes=["person", "car", "dog"],
+)
+dataset.apply_model(model, label_field="detections")
+
+session = fo.launch_app(dataset)
 ```
+
+After step 1 and 2 are done once, each subsequent script only needs
+`foz.load_zoo_model(...)` — the registration and weights persist across
+sessions.
+
+---
 
 ## Operations
 
@@ -60,7 +132,12 @@ foz.register_zoo_model_source(
 | `text_grounding`| `prompt="..."` (referring to text in image)                    | `fo.Detections` |
 | `gui_box`       | `prompt="..."` (GUI element region)                            | `fo.Detections` |
 
+---
+
 ## Examples
+
+Each example below assumes you've already run the registration + download
+steps from [Quick Start](#quick-start).
 
 ### Detect specific classes
 
@@ -76,14 +153,20 @@ dataset.apply_model(model, label_field="detections")
 ### Phrase grounding with per-sample prompts
 
 ```python
-model = foz.load_zoo_model("nvidia/LocateAnything-3B", operation="grounding")
+model = foz.load_zoo_model(
+    "nvidia/LocateAnything-3B",
+    operation="grounding",
+)
 dataset.apply_model(model, label_field="grounded", prompt_field="caption")
 ```
 
 ### Document layout
 
 ```python
-model = foz.load_zoo_model("nvidia/LocateAnything-3B", operation="layout")
+model = foz.load_zoo_model(
+    "nvidia/LocateAnything-3B",
+    operation="layout",
+)
 dataset.apply_model(model, label_field="layout")
 # Default classes: title, paragraph, figure, table
 ```
@@ -113,7 +196,10 @@ dataset.apply_model(model, label_field="ui_box")
 ### Scene text / OCR localization
 
 ```python
-model = foz.load_zoo_model("nvidia/LocateAnything-3B", operation="scene_text")
+model = foz.load_zoo_model(
+    "nvidia/LocateAnything-3B",
+    operation="scene_text",
+)
 dataset.apply_model(model, label_field="text")
 ```
 
@@ -128,7 +214,13 @@ model = foz.load_zoo_model(
 dataset.apply_model(model, label_field="text_location")
 ```
 
-### Video — frame-sampled inference
+---
+
+## Video inference
+
+The model is image-only at the core; the video model decodes frames and runs
+the image inference path per frame, returning `{frame_num: label}` so FiftyOne
+merges results into `sample.frames[N].field`.
 
 ```python
 video_model = foz.load_zoo_model(
@@ -142,13 +234,32 @@ video_dataset.apply_model(video_model, label_field="dets")
 # Per-frame results land in sample.frames[N].dets
 ```
 
+Frame extraction backend probe order: `decord` → `cv2` → `torchvision.io`.
+
+---
+
 ## Loading Eagle / Rex-Omni eval bundles
 
 Eagle ships eval data as JSONL in ShareGPT format with
-`<ref>label</ref><box>...</box>` ground-truth tokens. Use the included importer:
+`<ref>label</ref><box>...</box>` ground-truth tokens. The importer is in
+`dataset.py` inside the registered zoo source.
 
 ```python
-from fo_locate_anything.dataset import load_eagle_jsonl
+import importlib.util
+from pathlib import Path
+import fiftyone as fo
+
+# Resolve the source's on-disk path. FiftyOne's `register_zoo_model_source`
+# stores it at `<model_zoo_dir>/<manifest-name-as-path>/`, where the manifest
+# name `@Burhan-Q/fo-locate-anything` becomes the subpath `@Burhan-Q/fo-locate-anything`.
+_SOURCE = Path(fo.config.model_zoo_dir) / "@Burhan-Q" / "fo-locate-anything"
+
+_spec = importlib.util.spec_from_file_location(
+    "fo_locate_anything_dataset", _SOURCE / "dataset.py",
+)
+_dataset_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_dataset_mod)
+load_eagle_jsonl = _dataset_mod.load_eagle_jsonl
 
 ds = load_eagle_jsonl(
     jsonl_path="~/data/rex_omni/DocLayNet/annotations.jsonl",
@@ -158,12 +269,22 @@ ds = load_eagle_jsonl(
 # ds[i].ground_truth is fo.Detections; ds[i].prompt is the human turn
 ```
 
+> **Why the dynamic import?** The directory `@Burhan-Q/fo-locate-anything`
+> contains `@` and `-` characters — neither is valid in a Python identifier,
+> so `from @Burhan-Q.fo-locate-anything import ...` won't parse. The
+> `importlib.util.spec_from_file_location` pattern above bypasses Python's
+> normal package machinery and works regardless of the on-disk name.
+
 Compatible eval bundles:
 - [`Mountchicken/Rex-Omni-EvalData`](https://huggingface.co/datasets/Mountchicken/Rex-Omni-EvalData)
   (COCO, LVIS, Dense200, VisDrone, DocLayNet, M6Doc, TotalText, HierText, RefCOCOg, HumanRef)
 - [`likaixin/ScreenSpot-Pro`](https://huggingface.co/datasets/likaixin/ScreenSpot-Pro)
 
+---
+
 ## Configuration reference
+
+All `foz.load_zoo_model(...)` kwargs:
 
 | Kwarg | Default | Notes |
 |---|---|---|
@@ -182,6 +303,11 @@ Compatible eval bundles:
 | `fps` | `None` | Video: target sampling FPS (overrides `frames`) |
 | `every_nth` | `None` | Video: sample every Kth frame (overrides others) |
 
+For per-sample prompts (instead of a single static `prompt=`), pass
+`prompt_field="field_name"` to `dataset.apply_model(...)`.
+
+---
+
 ## Limitations
 
 - **No confidence scores** — the model emits no per-detection scores;
@@ -192,10 +318,12 @@ Compatible eval bundles:
 - **Layout taxonomy is 4 classes** (`title`, `paragraph`, `figure`, `table`);
   for other layouts use `detect` with your own class list.
 
+---
+
 ## Known-working dependency pins
 
-The Eagle pyproject pins specific versions. If you hit issues with the
-looser ranges in our manifest, try:
+The Eagle pyproject pins specific versions. If you hit issues with the looser
+ranges in our manifest, try:
 
 ```
 transformers==4.57.1
