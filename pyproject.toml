@@ -41,3 +41,15 @@ all = ["fo-locate-anything[video]"]
 dev = [
     "pytest>=9.0.2",
 ]
+
+[tool.pytest.ini_options]
+# Project root has __init__.py (required by FiftyOne zoo loader) which uses
+# package-relative imports. Dir name `fo-locate-anything` has hyphens so it
+# can't be a Python package. The conftest.py in .ref/tests loads zoo.py and
+# dataset.py via importlib under synthetic module names.
+#
+# `confcutdir` prevents pytest from walking up past .ref/tests when looking
+# for __init__.py / conftest.py. Without it, pytest sees the rootdir's
+# __init__.py and tries to evaluate its relative imports.
+addopts = "--import-mode=importlib --confcutdir=.ref/tests"
+testpaths = [".ref/tests"]
