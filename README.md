@@ -32,6 +32,21 @@ Install the runtime dependencies the model requires. `lmdb`, `peft`,
 `modeling_locateanything.py` and `processing_locateanything.py` files
 hard-import them at module-load time.
 
+### Easiest: via `requirements.txt`
+
+The repo ships a `requirements.txt` that uses PEP 508 environment markers to
+pick the correct `decord` (or `eva-decord` on arm64 macOS) for your platform:
+
+```bash
+pip install -r requirements.txt
+```
+
+Training extras live in a companion file:
+
+```bash
+pip install -r requirements-training.txt
+```
+
 ### Linux / Windows
 
 ```bash

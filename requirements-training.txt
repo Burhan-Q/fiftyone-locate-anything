@@ -1,0 +1,9 @@
+# Optional extras for users who also want to run Eagle's training pipeline.
+# Mirrors pyproject.toml's [project.optional-dependencies].training group.
+#
+# Usage:
+#   pip install -r requirements-training.txt
+
+-r requirements.txt
+accelerate
+liger-kernel
