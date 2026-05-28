@@ -8,34 +8,31 @@ dependencies = [
     "fiftyone>=1.15.0",
     "huggingface-hub",
     "torch",
+    "torchvision",
     "transformers>=4.57.1,<4.58",
     "tokenizers>=0.22.0",
     "Pillow",
     "numpy",
     "timm",
+    # The HF model's modeling/processing files hard-import all of these at
+    # module-load time (verified by inspection of modeling_locateanything.py
+    # and processing_locateanything.py on the HF repo). So they're required
+    # for any inference, not just video / training.
+    "lmdb",
+    "peft",
+    "opencv-python-headless>=4.10",
+    # decord has no arm64 macOS wheel; eva-decord is a fork that does and
+    # registers as the `decord` module. Platform markers auto-pick.
+    "decord; sys_platform != 'darwin'",
+    "eva-decord; sys_platform == 'darwin'",
 ]
 
 [project.optional-dependencies]
-# Default video extra. opencv ships everywhere; native `decord` only installs
-# on non-Mac platforms (it has no arm64 macOS wheel). MacOS users wanting
-# decord opt in to `decord-mac` (eva-decord fork — imports as `decord`).
-# Backend probe order at runtime: decord → cv2 → torchvision.io.
-video = [
-    "opencv-python-headless>=4.10",
-    "decord; sys_platform != 'darwin'",
-]
-# Opt-in for arm64 MacOS — installs eva-decord (registers as `decord` module).
-# Usage: pip install "fo-locate-anything[video,decord-mac]"
-decord-mac = [
-    "eva-decord; sys_platform == 'darwin'",
-]
+# Extras for the Eagle training pipeline; not required for inference.
 training = [
     "accelerate",
-    "peft",
-    "lmdb",
     "liger-kernel",
 ]
-all = ["fo-locate-anything[video]"]
 
 [dependency-groups]
 dev = [

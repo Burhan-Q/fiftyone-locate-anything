@@ -116,7 +116,7 @@ def parse_output(raw: str, mode: Literal["box", "point"]) -> list[dict[str, Any]
     `mode="point"` matches 2-int coords (worker's parse_points regex).
     Coords are validated to lie in [0, 1000].
     """
-    if not raw or _NONE_RE.search(raw):
+    if not raw:
         return []
 
     pattern = _BOX_RE if mode == "box" else _POINT_RE
