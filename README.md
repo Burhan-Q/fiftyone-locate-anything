@@ -41,12 +41,6 @@ pick the correct `decord` (or `eva-decord` on arm64 macOS) for your platform:
 pip install -r requirements.txt
 ```
 
-Training extras live in a companion file:
-
-```bash
-pip install -r requirements-training.txt
-```
-
 ### Linux / Windows
 
 ```bash

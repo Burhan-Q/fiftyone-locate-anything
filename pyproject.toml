@@ -17,7 +17,7 @@ dependencies = [
     # The HF model's modeling/processing files hard-import all of these at
     # module-load time (verified by inspection of modeling_locateanything.py
     # and processing_locateanything.py on the HF repo). So they're required
-    # for any inference, not just video / training.
+    # for any inference, not just video.
     "lmdb",
     "peft",
     "opencv-python-headless>=4.10",
@@ -27,12 +27,6 @@ dependencies = [
     "eva-decord; sys_platform == 'darwin'",
 ]
 
-[project.optional-dependencies]
-# Extras for the Eagle training pipeline; not required for inference.
-training = [
-    "accelerate",
-    "liger-kernel",
-]
 
 [dependency-groups]
 dev = [

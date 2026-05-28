@@ -1,19 +1,17 @@
-# Core inference requirements for fiftyone-locate-anything.
+# Inference requirements for fiftyone-locate-anything.
 #
 # The HF model's modeling_locateanything.py and processing_locateanything.py
 # hard-import lmdb, peft, opencv, and decord at module-load time, so all of
-# these are required for any inference (not just video / training).
+# these are required for any inference (not just video).
 #
 # Platform-conditional install (PEP 508 environment markers):
 #   - decord ships wheels for Linux and Windows but not arm64 macOS
 #   - eva-decord is a maintained fork that ships arm64 macOS wheels and
 #     registers as the `decord` module so the runtime code is unchanged
-# pip evaluates the markers and installs only the matching line.
+# The marker syntax tells the installer to apply only the matching line.
 #
 # Usage:
 #   pip install -r requirements.txt
-#
-# Training extras (accelerate, liger-kernel) live in requirements-training.txt.
 
 fiftyone>=1.15.0
 huggingface-hub
