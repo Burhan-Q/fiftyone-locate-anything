@@ -41,7 +41,8 @@ pick the correct `decord` (or `eva-decord` on arm64 macOS) for your platform:
 pip install -r requirements.txt
 ```
 
-### Linux / Windows
+<details>
+<summary><b>Linux / Windows</b></summary>
 
 ```bash
 pip install fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
@@ -49,7 +50,10 @@ pip install fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
             lmdb peft "opencv-python-headless>=4.10" decord
 ```
 
-### macOS (Apple Silicon / arm64)
+</details>
+
+<details>
+<summary><b>macOS (Apple Silicon / arm64)</b></summary>
 
 `decord` has no arm64 macOS wheel; use the maintained `eva-decord` fork instead
 (it registers as the `decord` module so the rest of the code is unchanged):
@@ -59,6 +63,8 @@ pip install fiftyone "transformers>=4.57.1,<4.58" "tokenizers>=0.22.0" \
             torch torchvision huggingface-hub Pillow timm numpy \
             lmdb peft "opencv-python-headless>=4.10" eva-decord
 ```
+
+</details>
 
 ### Via `uv`
 
@@ -73,15 +79,22 @@ uv add eva-decord                        # macOS
 
 ### Auto-install via FiftyOne (alternative)
 
-FiftyOne can install the manifest's required packages for you. After
-`register_zoo_model_source`, run:
+FiftyOne can install the manifest's required packages for you. The manifest
+ships PEP 508 environment markers, so `decord` (Linux/Win) vs `eva-decord`
+(arm64 macOS) is selected automatically.
+
+After `register_zoo_model_source`, you have two options:
 
 ```python
+# Install any missing packages
 foz.install_zoo_model_requirements("nvidia/LocateAnything-3B")
+
+# OR: check first, install only if anything is missing
+foz.ensure_zoo_model_requirements("nvidia/LocateAnything-3B")
 ```
 
-Note: on arm64 macOS this fails on `decord`. Install `eva-decord` manually
-first, then this command will skip already-satisfied deps.
+`ensure_zoo_model_requirements` is the safer default for repeat runs because
+it skips the install step entirely when everything is already present.
 
 ---
 

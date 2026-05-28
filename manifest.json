@@ -13,10 +13,16 @@
         "packages": [
           "huggingface-hub",
           "torch",
+          "torchvision",
           "transformers>=4.57.1,<4.58",
           "tokenizers>=0.22.0",
           "Pillow",
-          "timm"
+          "timm",
+          "lmdb",
+          "peft",
+          "opencv-python-headless>=4.10",
+          "decord; sys_platform != 'darwin'",
+          "eva-decord; sys_platform == 'darwin'"
         ],
         "cpu": {"support": true},
         "gpu": {"support": true}
