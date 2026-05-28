@@ -1,4 +1,4 @@
-# fo-locate-anything
+# fiftyone-locate-anything
 
 A [FiftyOne](https://github.com/voxel51/fiftyone) remote Model Zoo integration
 for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B) —
@@ -91,13 +91,13 @@ import fiftyone.zoo as foz
 
 # 1. Register the model source (one time per environment)
 foz.register_zoo_model_source(
-    "https://github.com/Burhan-Q/fo-locate-anything",
+    "https://github.com/Burhan-Q/fiftyone-locate-anything",
     overwrite=True,
 )
 
 # 2. Download the model weights (~4 GB, one time)
 foz.download_zoo_model(
-    "https://github.com/Burhan-Q/fo-locate-anything",
+    "https://github.com/Burhan-Q/fiftyone-locate-anything",
     model_name="nvidia/LocateAnything-3B",
 )
 
@@ -251,11 +251,11 @@ import fiftyone as fo
 
 # Resolve the source's on-disk path. FiftyOne's `register_zoo_model_source`
 # stores it at `<model_zoo_dir>/<manifest-name-as-path>/`, where the manifest
-# name `@Burhan-Q/fo-locate-anything` becomes the subpath `@Burhan-Q/fo-locate-anything`.
-_SOURCE = Path(fo.config.model_zoo_dir) / "@Burhan-Q" / "fo-locate-anything"
+# name `@Burhan-Q/fiftyone-locate-anything` becomes the subpath `@Burhan-Q/fiftyone-locate-anything`.
+_SOURCE = Path(fo.config.model_zoo_dir) / "@Burhan-Q" / "fiftyone-locate-anything"
 
 _spec = importlib.util.spec_from_file_location(
-    "fo_locate_anything_dataset", _SOURCE / "dataset.py",
+    "fiftyone_locate_anything_dataset", _SOURCE / "dataset.py",
 )
 _dataset_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_dataset_mod)
@@ -269,9 +269,9 @@ ds = load_eagle_jsonl(
 # ds[i].ground_truth is fo.Detections; ds[i].prompt is the human turn
 ```
 
-> **Why the dynamic import?** The directory `@Burhan-Q/fo-locate-anything`
+> **Why the dynamic import?** The directory `@Burhan-Q/fiftyone-locate-anything`
 > contains `@` and `-` characters — neither is valid in a Python identifier,
-> so `from @Burhan-Q.fo-locate-anything import ...` won't parse. The
+> so `from @Burhan-Q.fiftyone-locate-anything import ...` won't parse. The
 > `importlib.util.spec_from_file_location` pattern above bypasses Python's
 > normal package machinery and works regardless of the on-disk name.
 

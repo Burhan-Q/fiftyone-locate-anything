@@ -629,10 +629,9 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
             yield from self._sample_frames_torchvision(filepath)
         else:
             raise ImportError(
-                "Video inference needs a frame-extraction backend. Install one:\n"
-                "  pip install 'fo-locate-anything[video]'             # Linux/Win (decord + opencv)\n"
-                "  pip install 'fo-locate-anything[video,decord-mac]'  # arm64 MacOS (eva-decord)\n"
-                "  pip install 'fo-locate-anything[video]'             # MacOS (opencv only)"
+                "Video inference needs a frame-extraction backend. "
+                "Install one of: decord (Linux/Win), eva-decord (arm64 MacOS), "
+                "or opencv-python-headless. See README install section."
             )
 
     def _sample_frames_decord(self, filepath: str):

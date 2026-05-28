@@ -1,5 +1,5 @@
 [project]
-name = "fo-locate-anything"
+name = "fiftyone-locate-anything"
 version = "0.1.0"
 description = "FiftyOne Zoo remote model wrapping NVIDIA LocateAnything-3B"
 requires-python = ">=3.11"
@@ -41,7 +41,7 @@ dev = [
 
 [tool.pytest.ini_options]
 # Project root has __init__.py (required by FiftyOne zoo loader) which uses
-# package-relative imports. Dir name `fo-locate-anything` has hyphens so it
+# package-relative imports. Dir name `fiftyone-locate-anything` has hyphens so it
 # can't be a Python package. The conftest.py in .ref/tests loads zoo.py and
 # dataset.py via importlib under synthetic module names.
 #

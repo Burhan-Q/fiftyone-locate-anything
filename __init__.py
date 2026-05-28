@@ -16,9 +16,9 @@ Usage:
     )
     dataset.apply_model(model, label_field="detections")
 
-Eagle JSONL dataset import:
-    from fo_locate_anything.dataset import load_eagle_jsonl
-    ds = load_eagle_jsonl("annotations.jsonl", "images/")
+Eagle JSONL dataset import: see README for the importlib-based loader (the
+zoo source's on-disk directory contains characters that aren't valid in a
+Python identifier, so direct `import` won't parse).
 """
 
 from typing import Any

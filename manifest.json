@@ -1,6 +1,6 @@
 {
-  "name": "@Burhan-Q/fo-locate-anything",
-  "url": "https://github.com/Burhan-Q/fo-locate-anything",
+  "name": "@Burhan-Q/fiftyone-locate-anything",
+  "url": "https://github.com/Burhan-Q/fiftyone-locate-anything",
   "models": [
     {
       "base_name": "nvidia/LocateAnything-3B",
