@@ -1,4 +1,4 @@
-# fiftyone-locate-anything
+# FiftyOne Remote Zoo Model: NVIDIA Locate Anything
 
 A [FiftyOne](https://github.com/voxel51/fiftyone) remote Model Zoo integration
 for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B) —
