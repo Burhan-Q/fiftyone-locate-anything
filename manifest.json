@@ -20,9 +20,7 @@
           "timm",
           "lmdb",
           "peft",
-          "opencv-python-headless>=4.10",
-          "decord; sys_platform != 'darwin'",
-          "eva-decord; sys_platform == 'darwin'"
+          "opencv-python-headless>=4.10"
         ],
         "cpu": {"support": true},
         "gpu": {"support": true}

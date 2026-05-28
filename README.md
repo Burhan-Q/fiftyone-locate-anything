@@ -79,11 +79,8 @@ uv add eva-decord                        # macOS
 
 ### Auto-install via FiftyOne (alternative)
 
-FiftyOne can install the manifest's required packages for you. The manifest
-ships PEP 508 environment markers, so `decord` (Linux/Win) vs `eva-decord`
-(arm64 macOS) is selected automatically.
-
-After `register_zoo_model_source`, you have two options:
+FiftyOne can install the manifest's required packages for you. After
+`register_zoo_model_source`, you have two options:
 
 ```python
 # Install any missing packages
@@ -95,6 +92,13 @@ foz.ensure_zoo_model_requirements("nvidia/LocateAnything-3B")
 
 `ensure_zoo_model_requirements` is the safer default for repeat runs because
 it skips the install step entirely when everything is already present.
+
+**`decord` is not included in the manifest's auto-install list** because the
+correct distribution name is platform-dependent (`decord` on Linux/Win,
+`eva-decord` on arm64 macOS), and FiftyOne's package checker doesn't honor
+PEP 508 environment markers. Install one of those two manually before running
+inference (`requirements.txt` and the per-platform sections above handle this
+correctly).
 
 ---
 
