@@ -23,6 +23,7 @@ Eagle JSONL dataset import:
 
 from typing import Any
 
+from fiftyone.operators import types
 from huggingface_hub import snapshot_download
 
 from .zoo import (
@@ -59,4 +60,84 @@ def load_model(
     return LocateAnythingImageModel(config)
 
 
-# resolve_input is defined at the bottom of this file (Task 11 in the plan).
+def resolve_input(model_name: str, ctx: Any) -> types.Property:
+    """FiftyOne App operator UI for LocateAnything."""
+    inputs = types.Object()
+
+    inputs.enum(
+        "media_type",
+        values=["image", "video"],
+        default="image",
+        label="Media Type",
+    )
+
+    inputs.enum(
+        "operation",
+        values=[
+            "detect",
+            "grounding",
+            "point",
+            "scene_text",
+            "layout",
+            "text_grounding",
+            "gui_box",
+        ],
+        default="detect",
+        label="Operation",
+        description=(
+            "detect: provide classes. grounding/point/text_grounding/gui_box: "
+            "provide prompt. scene_text: no prompt. layout: optional classes "
+            "(defaults to title/paragraph/figure/table)."
+        ),
+    )
+
+    inputs.str(
+        "classes",
+        default=None,
+        required=False,
+        label="Classes (comma-separated)",
+        description="Used for detect and layout operations.",
+    )
+
+    inputs.str(
+        "prompt",
+        default=None,
+        required=False,
+        label="Prompt",
+        description=("Free-form phrase for grounding/point/text_grounding/gui_box."),
+    )
+
+    inputs.bool(
+        "single_instance",
+        default=False,
+        label="Single Instance (grounding only)",
+    )
+
+    inputs.enum(
+        "generation_mode",
+        values=["hybrid", "fast", "slow"],
+        default="hybrid",
+        label="Generation Mode",
+    )
+
+    inputs.int("max_new_tokens", default=2048, label="Max New Tokens")
+    inputs.bool("do_sample", default=True, label="Use Sampling")
+    inputs.float("temperature", default=0.7, label="Temperature")
+    inputs.float("top_p", default=0.9, label="Top-p")
+    inputs.float("repetition_penalty", default=1.1, label="Repetition Penalty")
+
+    inputs.int(
+        "frames",
+        default=8,
+        label="Video: # Sampled Frames",
+        description="Number of evenly-spaced frames per video.",
+    )
+    inputs.float(
+        "fps",
+        default=None,
+        required=False,
+        label="Video: Target FPS",
+        description="Overrides frame count.",
+    )
+
+    return types.Property(inputs)
