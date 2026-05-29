@@ -1,5 +1,13 @@
 # FiftyOne Remote Zoo Model: NVIDIA Locate Anything
 
+<p align="center">
+  <img
+    height="608"
+    alt="demonstration of using LocateAnything with FiftyOne"
+    src="https://github.com/user-attachments/assets/b371b0d6-f8dc-4fcb-8ffe-4bffe5df099d"
+  />
+</p>
+
 A [FiftyOne](https://github.com/voxel51/fiftyone) remote Model Zoo integration
 for NVIDIA's [LocateAnything-3B](https://huggingface.co/nvidia/LocateAnything-3B),
 an open-vocabulary grounding VLM from the
