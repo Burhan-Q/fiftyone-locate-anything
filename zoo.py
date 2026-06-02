@@ -361,6 +361,103 @@ class LocateAnythingBaseModel(
     ) -> ImageGetItem:
         return ImageGetItem(field_mapping=field_mapping, raw_inputs=True)
 
+    # -- Operation / prompt setters ----------------------------------------
+    # Property/setter pairs let users mutate the live model between
+    # apply_model calls without reloading weights. Internal code still
+    # reads `self.config.X` directly; these are an external API only.
+
+    @property
+    def operation(self) -> str:
+        return self.config.operation
+
+    @operation.setter
+    def operation(self, value: str) -> None:
+        if value not in VALID_OPERATIONS:
+            raise ValueError(
+                f"Invalid operation '{value}'. "
+                f"Must be one of {sorted(VALID_OPERATIONS)}"
+            )
+        self.config.operation = value
+
+    @property
+    def classes(self) -> list[str] | None:
+        return self.config.classes
+
+    @classes.setter
+    def classes(self, value: list[str] | None) -> None:
+        self.config.classes = value
+
+    @property
+    def prompt(self) -> str | None:
+        return self.config.prompt
+
+    @prompt.setter
+    def prompt(self, value: str | None) -> None:
+        self.config.prompt = value
+
+    @property
+    def single_instance(self) -> bool:
+        return self.config.single_instance
+
+    @single_instance.setter
+    def single_instance(self, value: bool) -> None:
+        self.config.single_instance = bool(value)
+
+    # -- Generation parameter setters --------------------------------------
+
+    @property
+    def generation_mode(self) -> str:
+        return self.config.generation_mode
+
+    @generation_mode.setter
+    def generation_mode(self, value: str) -> None:
+        if value not in {"hybrid", "fast", "slow"}:
+            raise ValueError(
+                f"Invalid generation_mode '{value}'. "
+                "Must be one of {'hybrid', 'fast', 'slow'}"
+            )
+        self.config.generation_mode = value
+
+    @property
+    def max_new_tokens(self) -> int:
+        return self.config.max_new_tokens
+
+    @max_new_tokens.setter
+    def max_new_tokens(self, value: int) -> None:
+        self.config.max_new_tokens = int(value)
+
+    @property
+    def do_sample(self) -> bool:
+        return self.config.do_sample
+
+    @do_sample.setter
+    def do_sample(self, value: bool) -> None:
+        self.config.do_sample = bool(value)
+
+    @property
+    def temperature(self) -> float:
+        return self.config.temperature
+
+    @temperature.setter
+    def temperature(self, value: float) -> None:
+        self.config.temperature = float(value)
+
+    @property
+    def top_p(self) -> float:
+        return self.config.top_p
+
+    @top_p.setter
+    def top_p(self, value: float) -> None:
+        self.config.top_p = float(value)
+
+    @property
+    def repetition_penalty(self) -> float:
+        return self.config.repetition_penalty
+
+    @repetition_penalty.setter
+    def repetition_penalty(self, value: float) -> None:
+        self.config.repetition_penalty = float(value)
+
     # -- Model loading -----------------------------------------------------
 
     def _load_model(self) -> None:
@@ -571,6 +668,32 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
     @property
     def media_type(self) -> str:
         return "video"
+
+    # -- Video sampling setters --------------------------------------------
+
+    @property
+    def frames(self) -> int | None:
+        return self.config.frames
+
+    @frames.setter
+    def frames(self, value: int | None) -> None:
+        self.config.frames = None if value is None else int(value)
+
+    @property
+    def fps(self) -> float | None:
+        return self.config.fps
+
+    @fps.setter
+    def fps(self, value: float | None) -> None:
+        self.config.fps = None if value is None else float(value)
+
+    @property
+    def every_nth(self) -> int | None:
+        return self.config.every_nth
+
+    @every_nth.setter
+    def every_nth(self, value: int | None) -> None:
+        self.config.every_nth = None if value is None else int(value)
 
     def predict(
         self, arg: Any, sample: fo.Sample | None = None
