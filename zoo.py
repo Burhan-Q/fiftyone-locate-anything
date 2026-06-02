@@ -30,6 +30,8 @@ VALID_OPERATIONS = {
 }
 LAYOUT_DEFAULT_CLASSES = ["title", "paragraph", "figure", "table"]
 
+VALID_GENERATION_MODES = {"hybrid", "fast", "slow"}
+
 
 # ============================================================================
 # Config
@@ -68,6 +70,11 @@ class LocateAnythingConfig(fout.TorchImageModelConfig):
 
         # Generation: defaults verbatim from locateanything_worker.py
         self.generation_mode = self.parse_string(d, "generation_mode", default="hybrid")
+        if self.generation_mode not in VALID_GENERATION_MODES:
+            raise ValueError(
+                f"Invalid generation_mode '{self.generation_mode}'. "
+                f"Must be one of {sorted(VALID_GENERATION_MODES)}"
+            )
         self.max_new_tokens = self.parse_number(d, "max_new_tokens", default=2048)
         self.do_sample = self.parse_bool(d, "do_sample", default=True)
         self.temperature = self.parse_number(d, "temperature", default=0.7)
@@ -401,7 +408,7 @@ class LocateAnythingBaseModel(
 
     @single_instance.setter
     def single_instance(self, value: bool) -> None:
-        self.config.single_instance = bool(value)
+        self.config.single_instance = value
 
     # -- Generation parameter setters --------------------------------------
 
@@ -411,10 +418,10 @@ class LocateAnythingBaseModel(
 
     @generation_mode.setter
     def generation_mode(self, value: str) -> None:
-        if value not in {"hybrid", "fast", "slow"}:
+        if value not in VALID_GENERATION_MODES:
             raise ValueError(
                 f"Invalid generation_mode '{value}'. "
-                "Must be one of {'hybrid', 'fast', 'slow'}"
+                f"Must be one of {sorted(VALID_GENERATION_MODES)}"
             )
         self.config.generation_mode = value
 
@@ -424,7 +431,7 @@ class LocateAnythingBaseModel(
 
     @max_new_tokens.setter
     def max_new_tokens(self, value: int) -> None:
-        self.config.max_new_tokens = int(value)
+        self.config.max_new_tokens = value
 
     @property
     def do_sample(self) -> bool:
@@ -432,7 +439,7 @@ class LocateAnythingBaseModel(
 
     @do_sample.setter
     def do_sample(self, value: bool) -> None:
-        self.config.do_sample = bool(value)
+        self.config.do_sample = value
 
     @property
     def temperature(self) -> float:
@@ -440,7 +447,7 @@ class LocateAnythingBaseModel(
 
     @temperature.setter
     def temperature(self, value: float) -> None:
-        self.config.temperature = float(value)
+        self.config.temperature = value
 
     @property
     def top_p(self) -> float:
@@ -448,7 +455,7 @@ class LocateAnythingBaseModel(
 
     @top_p.setter
     def top_p(self, value: float) -> None:
-        self.config.top_p = float(value)
+        self.config.top_p = value
 
     @property
     def repetition_penalty(self) -> float:
@@ -456,7 +463,7 @@ class LocateAnythingBaseModel(
 
     @repetition_penalty.setter
     def repetition_penalty(self, value: float) -> None:
-        self.config.repetition_penalty = float(value)
+        self.config.repetition_penalty = value
 
     # -- Model loading -----------------------------------------------------
 
@@ -677,7 +684,7 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
 
     @frames.setter
     def frames(self, value: int | None) -> None:
-        self.config.frames = None if value is None else int(value)
+        self.config.frames = value
 
     @property
     def fps(self) -> float | None:
@@ -685,7 +692,7 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
 
     @fps.setter
     def fps(self, value: float | None) -> None:
-        self.config.fps = None if value is None else float(value)
+        self.config.fps = value
 
     @property
     def every_nth(self) -> int | None:
@@ -693,7 +700,7 @@ class LocateAnythingVideoModel(LocateAnythingBaseModel):
 
     @every_nth.setter
     def every_nth(self, value: int | None) -> None:
-        self.config.every_nth = None if value is None else int(value)
+        self.config.every_nth = value
 
     def predict(
         self, arg: Any, sample: fo.Sample | None = None
