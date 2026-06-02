@@ -24,6 +24,7 @@ ScreenSpot-Pro, etc.).**
 - [Quick Start](#quick-start)
 - [Operations](#operations)
 - [Examples](#examples)
+- [Reusing a loaded model](#reusing-a-loaded-model-across-calls)
 - [Using the FiftyOne App](#using-the-fiftyone-app)
 - [Video inference](#video-inference)
 - [Loading Eagle / Rex-Omni eval bundles](#loading-eagle--rex-omni-eval-bundles)
@@ -244,6 +245,44 @@ model = foz.load_zoo_model(
 )
 dataset.apply_model(model, label_field="text_location")
 ```
+
+---
+
+## Reusing a loaded model across calls
+
+The model class exposes property setters for every user-tunable attribute, so
+you can mutate a single loaded instance between `apply_model` calls instead of
+calling `load_zoo_model` again (which would reload ~4 GB of weights).
+
+```python
+model = foz.load_zoo_model(
+    "nvidia/LocateAnything-3B",
+    operation="detect",
+    classes=["car", "person"],
+)
+dataset.apply_model(model, label_field="detect_results")
+
+# Switch operation, prompt, or any generation param in place:
+model.operation = "grounding"
+model.prompt = "the red car"
+dataset.apply_model(model, label_field="grounded_results")
+
+model.operation = "scene_text"
+dataset.apply_model(model, label_field="text_results")
+```
+
+Settable attributes:
+
+| Attribute | Validation |
+|---|---|
+| `operation` | One of the 7 supported operations |
+| `classes`, `prompt`, `single_instance` | None |
+| `generation_mode` | `"hybrid"` / `"fast"` / `"slow"` |
+| `max_new_tokens`, `do_sample`, `temperature`, `top_p`, `repetition_penalty` | None |
+| `frames`, `fps`, `every_nth` (video model only) | None |
+
+`model_path` and `media_type` are NOT settable — changing them requires a new
+`load_zoo_model` call.
 
 ---
 
